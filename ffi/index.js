@@ -2012,17 +2012,28 @@ integrateWasmJS(Module);
 
 // === Body ===
 
-var ASM_CONSTS = [function() { alert('hello world!'); throw 'all done'; }];
+var ASM_CONSTS = [function() { alert('hello world!'); },
+ function($0, $1, $2, $3, $4, $5, $6, $7) { let s = Module.getValue($7, 'i8*'); Module.print('I received: ', $0, $1, $2, $3, $4, $5, $6, s); },
+ function($0) { Module.print('I received: ' + $0); return $0 + 1; },
+ function($0) { console.log("js got string:", Module.UTF8ToString($0)); }];
+
+function _emscripten_asm_const_iiiiiiiii(code, a0, a1, a2, a3, a4, a5, a6, a7) {
+  return ASM_CONSTS[code](a0, a1, a2, a3, a4, a5, a6, a7);
+}
 
 function _emscripten_asm_const_i(code) {
   return ASM_CONSTS[code]();
+}
+
+function _emscripten_asm_const_ii(code, a0) {
+  return ASM_CONSTS[code](a0);
 }
 
 
 
 STATIC_BASE = Runtime.GLOBAL_BASE;
 
-STATICTOP = STATIC_BASE + 3056;
+STATICTOP = STATIC_BASE + 5728;
 /* global initializers */  __ATINIT__.push();
 
 
@@ -2031,7 +2042,7 @@ memoryInitializer = Module["wasmJSMethod"].indexOf("asmjs") >= 0 || Module["wasm
 
 
 
-var STATIC_BUMP = 3056;
+var STATIC_BUMP = 5728;
 Module["STATIC_BASE"] = STATIC_BASE;
 Module["STATIC_BUMP"] = STATIC_BUMP;
 
@@ -2094,6 +2105,8 @@ function copyTempDouble(ptr) {
       return dest;
     } 
 
+   
+
   
   var SYSCALLS={varargs:0,get:function (varargs) {
         SYSCALLS.varargs += 4;
@@ -2124,6 +2137,10 @@ function copyTempDouble(ptr) {
     return -e.errno;
   }
   }
+
+  function _emscripten_run_script(ptr) {
+      eval(Pointer_stringify(ptr));
+    }
 
   function ___syscall146(which, varargs) {SYSCALLS.varargs = varargs;
   try {
@@ -2226,7 +2243,7 @@ function invoke_iiii(index,a1,a2,a3) {
 
 Module.asmGlobalArg = { "Math": Math, "Int8Array": Int8Array, "Int16Array": Int16Array, "Int32Array": Int32Array, "Uint8Array": Uint8Array, "Uint16Array": Uint16Array, "Uint32Array": Uint32Array, "Float32Array": Float32Array, "Float64Array": Float64Array, "NaN": NaN, "Infinity": Infinity };
 
-Module.asmLibraryArg = { "abort": abort, "assert": assert, "enlargeMemory": enlargeMemory, "getTotalMemory": getTotalMemory, "abortOnCannotGrowMemory": abortOnCannotGrowMemory, "abortStackOverflow": abortStackOverflow, "nullFunc_ii": nullFunc_ii, "nullFunc_iiii": nullFunc_iiii, "invoke_ii": invoke_ii, "invoke_iiii": invoke_iiii, "_emscripten_asm_const_i": _emscripten_asm_const_i, "___lock": ___lock, "___syscall6": ___syscall6, "___setErrNo": ___setErrNo, "___syscall140": ___syscall140, "_emscripten_memcpy_big": _emscripten_memcpy_big, "___syscall54": ___syscall54, "___unlock": ___unlock, "___syscall146": ___syscall146, "DYNAMICTOP_PTR": DYNAMICTOP_PTR, "tempDoublePtr": tempDoublePtr, "ABORT": ABORT, "STACKTOP": STACKTOP, "STACK_MAX": STACK_MAX };
+Module.asmLibraryArg = { "abort": abort, "assert": assert, "enlargeMemory": enlargeMemory, "getTotalMemory": getTotalMemory, "abortOnCannotGrowMemory": abortOnCannotGrowMemory, "abortStackOverflow": abortStackOverflow, "nullFunc_ii": nullFunc_ii, "nullFunc_iiii": nullFunc_iiii, "invoke_ii": invoke_ii, "invoke_iiii": invoke_iiii, "_emscripten_asm_const_ii": _emscripten_asm_const_ii, "_emscripten_run_script": _emscripten_run_script, "_emscripten_asm_const_iiiiiiiii": _emscripten_asm_const_iiiiiiiii, "___lock": ___lock, "___syscall6": ___syscall6, "___setErrNo": ___setErrNo, "_emscripten_asm_const_i": _emscripten_asm_const_i, "___syscall140": ___syscall140, "_emscripten_memcpy_big": _emscripten_memcpy_big, "___syscall54": ___syscall54, "___unlock": ___unlock, "___syscall146": ___syscall146, "DYNAMICTOP_PTR": DYNAMICTOP_PTR, "tempDoublePtr": tempDoublePtr, "ABORT": ABORT, "STACKTOP": STACKTOP, "STACK_MAX": STACK_MAX };
 // EMSCRIPTEN_START_ASM
 var asm =Module["asm"]// EMSCRIPTEN_END_ASM
 (Module.asmGlobalArg, Module.asmLibraryArg, buffer);
@@ -2285,10 +2302,10 @@ var real__emscripten_get_global_libc = asm["_emscripten_get_global_libc"]; asm["
   return real__emscripten_get_global_libc.apply(null, arguments);
 };
 
-var real_stackAlloc = asm["stackAlloc"]; asm["stackAlloc"] = function() {
+var real____errno_location = asm["___errno_location"]; asm["___errno_location"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
-  return real_stackAlloc.apply(null, arguments);
+  return real____errno_location.apply(null, arguments);
 };
 
 var real_setThrew = asm["setThrew"]; asm["setThrew"] = function() {
@@ -2303,16 +2320,22 @@ var real__free = asm["_free"]; asm["_free"] = function() {
   return real__free.apply(null, arguments);
 };
 
+var real_stackAlloc = asm["stackAlloc"]; asm["stackAlloc"] = function() {
+  assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+  assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+  return real_stackAlloc.apply(null, arguments);
+};
+
 var real_stackRestore = asm["stackRestore"]; asm["stackRestore"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
   return real_stackRestore.apply(null, arguments);
 };
 
-var real____errno_location = asm["___errno_location"]; asm["___errno_location"] = function() {
+var real__llvm_bswap_i32 = asm["_llvm_bswap_i32"]; asm["_llvm_bswap_i32"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
-  return real____errno_location.apply(null, arguments);
+  return real__llvm_bswap_i32.apply(null, arguments);
 };
 Module["asm"] = asm;
 var _malloc = Module["_malloc"] = function() {
@@ -2359,10 +2382,10 @@ var _memcpy = Module["_memcpy"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
   return Module["asm"]["_memcpy"].apply(null, arguments) };
-var stackAlloc = Module["stackAlloc"] = function() {
+var ___errno_location = Module["___errno_location"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
-  return Module["asm"]["stackAlloc"].apply(null, arguments) };
+  return Module["asm"]["___errno_location"].apply(null, arguments) };
 var setThrew = Module["setThrew"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
@@ -2371,14 +2394,18 @@ var _free = Module["_free"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
   return Module["asm"]["_free"].apply(null, arguments) };
+var stackAlloc = Module["stackAlloc"] = function() {
+  assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+  assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+  return Module["asm"]["stackAlloc"].apply(null, arguments) };
 var stackRestore = Module["stackRestore"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
   return Module["asm"]["stackRestore"].apply(null, arguments) };
-var ___errno_location = Module["___errno_location"] = function() {
+var _llvm_bswap_i32 = Module["_llvm_bswap_i32"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
-  return Module["asm"]["___errno_location"].apply(null, arguments) };
+  return Module["asm"]["_llvm_bswap_i32"].apply(null, arguments) };
 var runPostSets = Module["runPostSets"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');

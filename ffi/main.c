@@ -5,7 +5,7 @@ int main() {
 
   EM_ASM(
     alert('hello world!');
-    throw 'all done';
+    // throw 'all done';
   );
 
   EM_ASM_({
@@ -20,5 +20,9 @@ int main() {
 
   printf("%d\n", x);
 
+  char* sample = "This is a string";
+  EM_ASM_({
+      console.log("js got string:", Module.UTF8ToString($0));
+  }, sample);
   return 0;
 }
