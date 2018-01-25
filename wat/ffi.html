@@ -3,6 +3,13 @@
     <head></head>
     <body>
         <script>
+         function fetchWasm(file, importObject) {
+             return fetch(file)
+                 .then(resp => resp.arrayBuffer())
+                 .then(bytes => WebAssembly.instantiate(bytes, importObject))
+                 .then(result => result.instance);
+         }
+
          var importObject = {
              constants: {
                  n: 9
@@ -13,14 +20,7 @@
                  }
              }
          };
-         function fetchWasm(file) {
-             return fetch(file)
-                 .then(resp => resp.arrayBuffer())
-                 .then(bytes => WebAssembly.instantiate(bytes, importObject))
-                 .then(result => result.instance);
-         }
-
-         fetchWasm('./target/ffi.wasm').then(mod => {
+         fetchWasm('./target/ffi.wasm', importObject).then(mod => {
              mod.exports.logIt();
          });
         </script>
