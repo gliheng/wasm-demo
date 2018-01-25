@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>WASM memory test</title>
+    </head>
+    <body>
+        <script>
+         function fetchWasm(file, importObject) {
+             return fetch(file)
+                 .then(resp => resp.arrayBuffer())
+                 .then(bytes => WebAssembly.instantiate(bytes, importObject))
+                 .then(result => result.instance);
+         }
+
+         var memory = new WebAssembly.Memory({initial:10, maximum:100});
+         fetchWasm('./target/memory.wasm', { js: { mem: memory } }).then(mod => {
+             var i32 = new Uint32Array(memory.buffer);
+             i32[0] = 10;
+             i32[1] = 20;
+             var sum = mod.exports.add(0, 1);
+             console.log("add result:", sum);
+         });
+        </script>
+    </body>
+
+</html>
