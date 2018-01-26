@@ -4,9 +4,8 @@
     <body>
         <script>
          function fetchWasm(file, importObject) {
-             return fetch(file)
-                 .then(resp => resp.arrayBuffer())
-                 .then(bytes => WebAssembly.instantiate(bytes, importObject))
+             return WebAssembly.compileStreaming(fetch(file))
+                 .then(module => WebAssembly.instantiate(module, importObject))
                  .then(result => result.instance);
          }
 
